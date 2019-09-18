@@ -1,5 +1,3 @@
-tea
-coffee
-hot water
-milk
-opaltine
+Tea
+Coffee
+Water
