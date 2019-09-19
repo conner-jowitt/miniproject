@@ -112,16 +112,19 @@ def print_table(object_list, title, is_indexed=False):  # indexed = 0 or 1, when
     for thing in object_list:
         if len(thing) > max_len:
             max_len = len(thing)
+
     max_len += 2 + (is_indexed * 5)
     print_border(max_len)
     print("|" + title + " " * (max_len - len(title)) + "|")
     print_border(max_len)
+
     if not is_indexed:
         for thing in object_list:
             print("|" + thing + " " * (max_len - len(thing)) + "|")
     else:
         for i in range(len(object_list)):
             print("|" + f" [{i}] " + object_list[i] + " " * (max_len - len(object_list[i]) - 5) + "|")
+
     print_border(max_len)
 
 
@@ -170,6 +173,7 @@ def remove_item(object_list, object_type):
         else:
             print("Entry not recognized! Nothing removed from list\n")
             print_table(object_list, object_type, True)
+
         to_rem = enter_integer("Which entry would you like to remove (Leave blank to cancel)? ",
                                "Entry not recognized! Nothing removed from list\n")
         clear_screen()
@@ -180,6 +184,7 @@ def choose_item(object_list, object_type,
                 error_message="I can't find that item in the list sorry! Please try again (leave blank to cancel): "):
     print_table(object_list, object_type, True)
     fav_choice_name = enter_integer(input_message, "Please enter a number! ")
+
     while fav_choice_name != "":
         if fav_choice_name not in range(len(object_list)):
             clear_screen()
@@ -188,6 +193,7 @@ def choose_item(object_list, object_type,
             fav_choice_name = enter_integer(input_message, "Please enter a number! ")
         else:
             return fav_choice_name
+
     return fav_choice_name
 
 
@@ -224,16 +230,20 @@ def remove_person_from_round(current_round):
 def main_menu(drinks_list, names_list, favs_list, current_round):
     choice = -1
     print_menu(menu1)
+
     while choice != menu_exit_value:
         choice = enter_integer("Choice: ", "I don't recognize that choice sorry!")
+
         if choice == 0:  # Show People
             clear_screen()
             print_table(names_list, "People")
             print_menu(menu1, True)
+
         elif choice == 1:  # Show drinks
             clear_screen()
             print_table(drinks_list, "Drinks")
             print_menu(menu1, True)
+
         elif choice == 2:  # Add people
             clear_screen()
             print("Current list: ")
@@ -244,6 +254,7 @@ def main_menu(drinks_list, names_list, favs_list, current_round):
                     favs_list[person] = ""
             store.save_items("names.txt", names_list)
             print_menu(menu1, True)
+
         elif choice == 3:  # Add drinks
             clear_screen()
             print("Current list: ")
@@ -251,6 +262,7 @@ def main_menu(drinks_list, names_list, favs_list, current_round):
             drinks_list = add_item(drinks_list, "drinks")
             store.save_items("drinks.txt", drinks_list)
             print_menu(menu1, True)
+
         elif choice == 4:  # remove people
             clear_screen()
             print("Current list: ")
@@ -262,6 +274,7 @@ def main_menu(drinks_list, names_list, favs_list, current_round):
             store.save_items("names.txt", names_list)
             store.json_save("favs.txt", favs_list)
             print_menu(menu1)
+
         elif choice == 5:  # remove drinks
             clear_screen()
             print("Current list: ")
@@ -273,8 +286,10 @@ def main_menu(drinks_list, names_list, favs_list, current_round):
             store.save_items("drinks.txt", drinks_list)
             store.json_save("favs.txt", favs_list)
             print_menu(menu1)
+
         elif choice == 6:  # all favourite options currently
             favourites_menu(names_list, drinks_list, favs_list)
+
         elif choice == 7:  # Rounds stuff
             if current_round.get_brew_maker() == "":
                 print("There is currently no active round! Creating a new round!")
@@ -293,10 +308,13 @@ def main_menu(drinks_list, names_list, favs_list, current_round):
                           f"edit round menu")
                     input("")
                     round_menu(drinks_list, names_list, current_round)
+
             else:
                 round_menu(drinks_list, names_list, current_round)
+
         elif choice == menu_exit_value:  # exit
             print("Thank you for using brIW!\nGoodbye!")
+
         else:  # Anything else
             print("Sorry, I don't recognise that choice! Please try again")
 
@@ -307,16 +325,20 @@ def favourites_menu(names_list, drinks_list, favs_list):
     fav_choice_name = choose_item(names_list, "People")
     while fav_choice_name != "":
         clear_screen()
+
         if favs_list[names_list[fav_choice_name]] != "":
             print(
                 f"{names_list[fav_choice_name]} already has {favs_list[names[fav_choice_name]]} as their favourite "
                 f"drink, this will overwrite that!")
         fav_choice_drink = choose_item(drinks_list, "Drinks")
+
         if fav_choice_drink != "":
             favs[names_list[int(fav_choice_name)]] = drinks_list[int(fav_choice_drink)]
+
         store.json_save("favs.txt", favs)
         print_favs()
         fav_choice_name = choose_item(names_list, "People")
+
     print_favs()
     print_menu(menu1, True)
 
@@ -327,8 +349,10 @@ def round_menu(drinks_list, names_list, current_round):
     print_round(current_round)
     print_menu(menu3, True)
     choice = 0
+
     while choice != menu_exit_value:
         choice = enter_integer("Please type your selection: ", "I don't recognize that choice sorry!")
+
         if choice == 0: # Add People
             val = choose_item(names_list, "People")
             if val != "":
@@ -337,22 +361,26 @@ def round_menu(drinks_list, names_list, current_round):
             store.json_save("saved_round.txt", current_round.class_dict_to_save())
             print(current_round.get_orders())
             print_menu(menu3, True)
+
         elif choice == 1:  # Remove people
             remove_person_from_round(current_round)
             clear_screen()
             store.json_save("saved_round.txt", current_round.class_dict_to_save())
             print(current_round.get_orders())
             print_menu(menu3, True)
+
         elif choice == 2: # Edit drinks
             update_round_drinks(drinks_list, current_round)
             clear_screen()
             store.json_save("saved_round.txt", current_round.class_dict_to_save())
             print(current_round.get_orders())
             print_menu(menu3, True)
+
         elif choice == 3: # Print round
             clear_screen()
             print(current_round.get_orders())
             print_menu(menu3, True)
+
         elif choice == 4: # Close round
             clear_screen()
             # TODO save metadata to allow stats? will possibly be using database anyway so may not be necessary
@@ -361,41 +389,64 @@ def round_menu(drinks_list, names_list, current_round):
             print(orders)
             choice = menu_exit_value
             input("Press enter to return to the main menu.")
+
         else:
             print("That option is not in the list!")
+
         clear_screen()
         print_round(current_round)
         print_menu(menu3, True)
+
     clear_screen()
     print_menu(menu1, False)
 
 
 names = store.load_items("names.txt")
 drinks = store.load_items("drinks.txt")
-menu_exit_value = ""
 favs = store.json_load("favs.txt")
+
+menu_exit_value = ""
+
 round_number = 0
+
 saved_round = Round(store.json_load("saved_round.txt"))
+
 menu1 = menu.Menu(["View People", "View Drinks", "Add People", "Add Drinks", "Remove People", "Remove Drinks",
                    "Update Favourites", "Update Round"])
+
 menu2 = menu.Menu(["Add/Update a favourite"])
+
 menu3 = menu.Menu(["Add people", "Remove people", "Update drinks", "Get current order", "End current round"])
 
-if __name__ == "__main__":
+# ***************************************************************
+# Main App Function
+# ****************************************************************
+
+
+def run_briw():
     if len(arguments) != 1:  # If there are any arguments just run those and skip the rest
         for arg in arguments[1:]:
+
             if arg == "get-people":
                 print_table(names, "People")
+
             elif arg == "get-drinks":
                 print_table(drinks, "Drinks")
+
             elif arg == "get-favourites":
                 print_table(concat_favs(favs), "Favourites")
+
             elif arg == "get-order":
                 if saved_round.get_brew_maker() != "":
                     print_table(concat_favs(saved_round.get_orders()), "Orders")
                 else:
                     print("No round in progress! \n")
+
             else:
                 print("Argument not recognized: ", arg)
+
     else:  # Otherwise open the application in UI mode
         main_menu(drinks, names, favs, saved_round)
+
+if __name__ == "__main__":
+    run_briw()
