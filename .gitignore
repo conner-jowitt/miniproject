@@ -3,3 +3,5 @@
 to_add.txt
 **/.idea/*
 .coverage
+SQL_script.sql
+connection.py

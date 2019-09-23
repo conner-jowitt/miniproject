@@ -4,6 +4,7 @@ import sys
 import os
 import menu
 import store
+from connection import db
 
 arguments = sys.argv
 
@@ -449,4 +450,14 @@ def run_briw():
         main_menu(drinks, names, favs, saved_round)
 
 if __name__ == "__main__":
-    run_briw()
+    cursor = db.cursor()
+    try:
+        cursor.execute("SELECT * FROM drinks")
+        results = cursor.fetchall()
+
+        for row in results:
+            print(row)
+    except:
+        print("something went wrong")
+    # run_briw()
+    db.close
