@@ -1,3 +1,5 @@
-Tea
-Coffee
-Water
+tea
+coffee
+water
+beer
+milk

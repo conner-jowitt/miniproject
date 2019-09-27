@@ -49,8 +49,8 @@ class Menu():  # TODO add starting index
     def get_length(self):
         return len(self.options)
 
-    def get_header():
+    def get_header(self):
         return self.header
 
-    def set_header(new_header):
+    def set_header(self, new_header):
         self.header = new_header

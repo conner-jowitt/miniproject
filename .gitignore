@@ -5,3 +5,4 @@ to_add.txt
 .coverage
 SQL_script.sql
 connection.py
+**/website/*

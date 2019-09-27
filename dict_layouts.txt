@@ -1,0 +1,12 @@
+drinks:
+{drink_id: {drink_name: "some drink name",
+            drink_description: "a description of the drink"
+            active: T/F}
+}
+
+people:
+{person_id: {first_name: "somename",
+             surname: "othername",
+             favourite_drink_id: #
+             active: T/F}
+}
