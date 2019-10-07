@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block headstuff %}
+        <title>People data</title>
+        <script>
+        function onClickSubmit()
+        {
+            var name = document.forms["formValidate"]["input_name"].value;
+            if (name == ""){ 
+                alert("Name cannot be blank!");
+                return false;
+            }
+            else {return true;}
+        }
+        </script>
+{% endblock %}
+
+
+{% block container %}
+            <h1>
+                People in BrIW
+            </h1>
+            {% if person == "  none  " %}
+            <p>
+            Enter a name and favourite drink below to add that person to our database. They will be assigned tea as a favourite drink, so plase use the <a href="/favourites">favourites page</a> to update this if necessary.
+            </p>
+            {% else %}
+            <p>
+            {{person}} has been added to the database with tea as their favourite drink. Please use the <a href="/favourites">favourites page</a> to update this, or use the form below to add more people.
+            </p>
+            {% endif %}
+            </br>
+            <form name="formValidate" onsubmit = "return onClickSubmit()" method="post">
+            Name:
+            <input type="text" name="input_name">
+            <input type="submit" value="Submit">
+        </form>
+{% endblock %}

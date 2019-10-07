@@ -100,27 +100,19 @@ def add_item(object_list, object_type):  # TODO clean, add drink description?
     new_items = []
     while to_add != "":
         if to_add != "":
-            print(object_type)
             if object_type == "people":
-                if store.save_new_person_to_db(to_add):
-                    new_items.append(to_add)
-                    print(to_add + " has been added to the list")
-                    print("Here's the new list:")
-                    print_table(object_list + new_items, object_type)
-                    to_add = input(f"Continue typing to add more {object_type} (Leave blank to cancel): ")
-                    clear_screen()
-                else:
-                    print(f"{to_add} has not been added tot he list! please try again, or lave blank to cancel")
-            elif object_type == "drinks":
-                if store.save_new_drink_to_db(to_add):
-                    new_items.append(to_add)
-                    print(to_add + " has been added to the list")
-                    print("Here's the new list:")
-                    print_table(object_list + new_items, object_type)
-                    to_add = input(f"Continue typing to add more {object_type} (Leave blank to cancel): ")
-                    clear_screen()
-                else:
-                    print(f"{to_add} has not been added tot he list! please try again, or lave blank to cancel")
+                added_to_db = store.save_new_person_to_db(to_add)
+            else:
+                added_to_db = store.save_new_drink_to_db(to_add)
+            if added_to_db:
+                new_items.append(to_add)
+                print(to_add + " has been added to the list")
+                print("Here's the new list:")
+                print_table(object_list + new_items, object_type)
+                to_add = input(f"Continue typing to add more {object_type} (Leave blank to cancel): ")
+                clear_screen()
+            else:
+                print(f"{to_add} has not been added tot he list! please try again, or lave blank to cancel")
     return object_list + new_items
 
 
@@ -175,10 +167,7 @@ def update_round_drinks(drinks_list, current_round):
         val = choose_item(drinks_list, "Drinks")
         if val != menu_exit_value:
             current_round.update_drink(drinks_list[val], people[to_update])
-            store.update_db_round_drink_row_value("round",
-                                                  drinks_list[val],
-                                                  current_round.get_round_id(),
-                                                  people[to_update])
+            store.update_db_round_persons_drink(drinks_list[val], current_round.get_round_id(), people[to_update])
 
 
 def remove_person_from_round(current_round):
@@ -272,7 +261,7 @@ def main_menu(drinks_list, names_list, favs_list, active_round_dict):
                     new_brewer_fav = favs_list[names_list[new_brewer]]
                     if not new_brewer_fav:
                         new_brewer_fav = "no fav"
-                    new_round_id = store.save_new_round_to_db(names_list[new_brewer], new_brewer_fav)[1]
+                    new_round_id = store.save_new_round_to_db_from_id(names_list[new_brewer], new_brewer_fav)[1]
                     print(f"{names_list[new_brewer]} has been selected to make this round. press enter to go to the "
                           f"edit round menu")
                     input("")

@@ -1,8 +1,12 @@
 **/venv/*
 **/__pycache__/*
+**/ansiblestuff/*
 to_add.txt
 **/.idea/*
 .coverage
 SQL_script.sql
 connection.py
 **/website/*
+Dockerfile
+requirements.txt
+app_requirements.txt

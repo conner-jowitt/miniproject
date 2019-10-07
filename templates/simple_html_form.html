@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% if not input1 %}
+{% set input1="Name" %}
+{% endif %}
+
+{% if not input2 %}
+{% set input2="Drink" %}
+{% endif %}
+
+
+{% block headstuff %}
+{% block titledata %}{% endblock %}
+        <script>
+        function onClickSubmit()
+        {
+            var name = document.forms["formValidate"]["input_name"].value;
+            var drink = document.forms["formValidate"]["input_drink"].value;
+            if (name == ""){ 
+                alert("Name cannot be blank!");
+                return false;
+            }
+            else {return true;}
+        }
+        </script>
+{% endblock %}
+
+
+{% block container %}
+{% block aboveForms %}{% endblock %}
+        <form name="formValidate" onsubmit = "return onClickSubmit()" method="post">
+            {{input1}}:
+            <input type="text" name="input_name">
+            {{input2}}:
+            <input type="text" name="input_drink">
+            <input type="submit" value="Submit">
+        </form>
+{% block belowForms %}{% endblock %}
+{% endblock %}

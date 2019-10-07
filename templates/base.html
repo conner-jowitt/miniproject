@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="static/base.css">
+        {% block headstuff %}{% endblock %}
+    </head>
+    <body>
+        <div class="topbanner">
+            <p style="position:relative;top:-125px;">BrIW!</p>
+        </div>  
+        <div class="menubar">
+            <a href="/people"> People </a>
+             - 
+            <a href="/drinks"> Drinks </a>
+             - 
+            <a href="/favourites"> Favourites </a>
+             - 
+            <a href="/rounds"> Rounds </a>
+        </div>
+        <div class="mainBody">
+            {% block container  %}{% endblock  %}
+        </div>
+    </body>
+</html>

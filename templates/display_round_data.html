@@ -1,0 +1,36 @@
+{%  extends 'simple_html_form.html'  %}
+
+{% block titledata  %}
+{% if brewer != "none" %}
+        <title>Round in Progress</title>
+{% else %}
+        <title>No round in progress... Yet!</title>
+{% endif %}
+{% endblock  %}
+
+{% block aboveForms  %}
+{% if brewer != "none" %}
+            <h1>
+                {{brewer}} is brewing a round! Get your order in now!
+            </h1>
+{% else  %}
+            <h1>
+                There is no round in progress, enter your name and drink selection below to start brewing!
+            </h1>
+{% endif %}
+{% endblock %}
+{% block belowForms %}
+{% if brewer != "none" %}
+            <h3>
+                Orders received so far:
+            </h3>
+            <ul>
+            {% for item in round %}
+                <li> {{item[0]}} has ordered {{item[1]}}</li>
+            {% endfor %}
+            </ul>
+            <form action="/clearround" method="post">
+                <input type="submit" value="Complete round">
+            </form>
+{% endif %}
+{% endblock  %}

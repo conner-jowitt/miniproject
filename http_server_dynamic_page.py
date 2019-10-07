@@ -50,7 +50,12 @@ class PersonHandler(BaseHTTPRequestHandler):
 </html>
         """
         list_items = ""
-        if path == "people":            
+        if path == "":
+            list_items = "Please go to <a href=./rounds>/rounds</a> for rounds, <a href=./people>/people</a>"
+            list_items += " for people info, or <a href=./drinks>/drinks</a> for drinks information."
+            webpage = html_page_top + "<h1>Menu</h1>"  + list_items + html_page_bottom
+            self.wfile.write(webpage.encode('utf-8'))
+        elif path == "people":            
             people = store.load_all_from_db("people")
             people_dict = return_json(["person_id", "full_name", "favourite_drink_id", "active"], people)
             list_items = html_results(list_from_dict(people_dict, "full_name"))
