@@ -34,7 +34,7 @@ def return_json(column_headers, db_rows):
 
 def get_order_people_and_drinks(order_list):
     return_list = []
-    for row in active_rounds:
+    for row in order_list:
         person = store.get_person_name_from_id(row[1]).capitalize()
         drink = store.get_drink_name_from_id(row[2])
         return_list.append([person, drink])
@@ -92,17 +92,23 @@ def update_people():
     # TODO actual errors
     if request.method == "POST":
         person_name = clean_input(request.form.get("input_name")).lower()
+        people = store.load_all_from_db("people")
+        people_list = []
+        if people:
+            for person in people:
+                people_list.append(person[1].capitalize())
 
         if not person_name:
             return {"you": "messed up"}
         
         if store.is_in_db("people", "full_name", person_name):
             # person is in db already, check they're active & reactivate if not?
-            return {}
+            return render_template("people_page.html", person="  none  ", people=people_list)
         else:
             store.save_new_person_to_db(person_name)
             store.update_db_row_value("people", "full_name", person_name, "favourite_drink_id", 1)
-            return render_template("people_page.html", person=person_name.capitalize())
+            people_list.append(person_name.capitalize())
+            return render_template("people_page.html", person=person_name.capitalize(), people=people_list)
 
     else:
         return "Hello World!"
