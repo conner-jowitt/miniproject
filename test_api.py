@@ -125,15 +125,67 @@ class Test_Methods(unittest.TestCase):
     
     @unittest.mock.patch('flask.render_template')
     @unittest.mock.patch('store.load_all_from_db', return_value=[[1, "tea", "refreshing tea", 1], [2, "coffee", "refreshing coffee", 1], [3, "sewer water", "refreshing sewer water", 1]])
-    def test_update_drinks_get_returning_correct_page(self, load_people, returned_page):
+    def test_update_drinks_get_returning_correct_page(self, load_drinks, returned_page):
         #Arrange
 
         # Act
         response = self.app.get("/drinks")
 
         # Assert
-        load_people.assert_called_with("drinks")
+        load_drinks.assert_called_with("drinks")
         returned_page.assert_called_with("drinks_page.html", drinks=[["tea", "refreshing tea"], ["coffee", "refreshing coffee"], ["sewer water", "refreshing sewer water"]])
+    
+    @unittest.mock.patch('flask.render_template')
+    def test_update_favourites_get_returning_correct_page(self, returned_page):
+        #Arrange
 
+        # Act
+        response = self.app.get("/favourites")
+
+        # Assert
+        returned_page.assert_called_with("favourites_page.html")
+    
+    @unittest.mock.patch('flask.render_template')
+    @unittest.mock.patch('store.load_all_active_from_db', return_value=[[1, 1, 1, 1, 3], [1, 2, 1, 1, 3], [1, 3, 3, 1, 3]])
+    @unittest.mock.patch('new_api_with_flask.get_order_people_and_drinks')
+    @unittest.mock.patch('store.get_person_name_from_id', return_value="joe")
+    def test_update_drinks_get_returning_correct_page_when_active_round(self, get_brewer, returned_orders, load_rounds, returned_page):
+        #Arrange
+        returned_orders.return_value=[["Joe", "tea"], ["alf", "coffee"], ["alfred", "tea"]]
+        orders = [["Joe", "tea"], ["alf", "coffee"], ["alfred", "tea"]]
+
+        # Act
+        response = self.app.get("/rounds")
+
+        # Assert
+        get_brewer.assert_called_with(3)
+        returned_orders.assert_called_with([[1, 1, 1, 1, 3], [1, 2, 1, 1, 3], [1, 3, 3, 1, 3]])
+        load_rounds.assert_called_with("round")
+        returned_page.assert_called_with("display_round_data.html", round=orders, brewer="Joe")
+    
+    @unittest.mock.patch('flask.render_template')
+    @unittest.mock.patch('store.load_all_active_from_db', return_value=[])
+    def test_update_drinks_get_returning_correct_page_when_no_active_rounds(self, load_rounds, returned_page):
+        #Arrange
+
+        # Act
+        response = self.app.get("/rounds")
+
+        # Assert
+        load_rounds.assert_called_with("round")
+        returned_page.assert_called_with("display_round_data.html", brewer="  none  ")
+    
+    @unittest.mock.patch('flask.redirect')
+    @unittest.mock.patch('store.update_db_row_value')
+    def test_clear_round_calling_correct_function_and_redirecting(self, update_row, returned_page):
+        #Arrange
+
+        # Act
+        response = self.app.post("/clearround")
+
+        # Assert
+        update_row.assert_called_with("round", "active", 1, "active", 0)
+        returned_page.assert_called_with("/rounds", code=302)
+ 
 if __name__ == "__main__":
     unittest.main()
