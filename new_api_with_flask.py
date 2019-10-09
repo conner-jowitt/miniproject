@@ -1,7 +1,7 @@
-from flask import Flask, jsonify, request, render_template, redirect
+import flask
 import store
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 
 # ****************************************************************
@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 
 def clean_input(user_input):
-    special_chars = "|%&£$^!()*+=~[]{}/?<>,.`,;:@#'\"\\"
+    special_chars = "|%&£$^!()-*+=~[]{}/?<>,.`,;:@#'\"\\"
     user_input = user_input.strip((special_chars + " "))
     result = ""
     for char in user_input:
@@ -80,18 +80,18 @@ def api_page():
 
 @app.route("/people", methods=["GET", "POST"])
 def update_people():
-    if request.method == "GET":
+    if flask.request.method == "GET":
         people = store.load_all_from_db("people")
         people_list = []
         if people:
             for person in people:
                 people_list.append(person[1].capitalize())
-        return render_template("people_page.html", person="  none  ", people=people_list)
+        return flask.render_template("people_page.html", person="  none  ", people=people_list)
 
     # TODO make sure everything is active when already in DB
     # TODO actual errors
-    if request.method == "POST":
-        person_name = clean_input(request.form.get("input_name")).lower()
+    if flask.request.method == "POST":
+        person_name = clean_input(flask.request.form.get("input_name")).lower()
         people = store.load_all_from_db("people")
         people_list = []
         if people:
@@ -103,12 +103,12 @@ def update_people():
         
         if store.is_in_db("people", "full_name", person_name):
             # person is in db already, check they're active & reactivate if not?
-            return render_template("people_page.html", person="  none  ", people=people_list)
+            return flask.render_template("people_page.html", person="  none  ", people=people_list)
         else:
             store.save_new_person_to_db(person_name)
             store.update_db_row_value("people", "full_name", person_name, "favourite_drink_id", 1)
             people_list.append(person_name.capitalize())
-            return render_template("people_page.html", person=person_name.capitalize(), people=people_list)
+            return flask.render_template("people_page.html", person=person_name.capitalize(), people=people_list)
 
     else:
         return "Hello World!"
@@ -116,19 +116,19 @@ def update_people():
 
 @app.route("/drinks", methods=["GET", "POST"])
 def update_drinks():
-    if request.method == "GET":
+    if flask.request.method == "GET":
         drinks = store.load_all_from_db("drinks")
         drinks_list = []
         if drinks:
             for item in drinks:
                 drinks_list.append([item[1], item[2]])
-        return render_template("drinks_page.html", drinks=drinks_list)
+        return flask.render_template("drinks_page.html", drinks=drinks_list)
 
     # TODO make sure everything is active when already in DB
     # TODO actual errors
-    if request.method == "POST":
-        drink_name = clean_input(request.form.get("input_name")).lower()
-        drink_description = clean_input(request.form.get("input_drink")).lower()
+    if flask.request.method == "POST":
+        drink_name = clean_input(flask.request.form.get("input_name")).lower()
+        drink_description = clean_input(flask.request.form.get("input_drink")).lower()
 
         if (not drink_name) or (not drink_description):
             return {"you": "messed up"}
@@ -144,7 +144,7 @@ def update_drinks():
             if drinks:
                 for item in drinks:
                     drinks_list.append([item[1], item[2]])
-            return render_template("drinks_page.html", drinks=drinks_list)
+            return flask.render_template("drinks_page.html", drinks=drinks_list)
 
     else:
         return "Hello World!"
@@ -152,20 +152,20 @@ def update_drinks():
 
 @app.route("/favourites", methods=["GET", "POST"])
 def update_favourites():
-    if request.method == "GET":
-        return render_template("favourites_page.html")
+    if flask.request.method == "GET":
+        return flask.render_template("favourites_page.html")
     
 
-    elif request.method == "POST":
-        person_name = clean_input(request.form.get("input_name")).lower()
-        drink_name = clean_input(request.form.get("input_drink")).lower()
+    elif flask.request.method == "POST":
+        person_name = clean_input(flask.request.form.get("input_name")).lower()
+        drink_name = clean_input(flask.request.form.get("input_drink")).lower()
         if not drink_name:
             person_id = store.get_person_id_from_name(person_name)
             if not person_id:
                 return {"you": "messed up"}
             person_fav_id = store.load_some_rows_active_columns_from_db(["favourite_drink_id"], "people", "person_id", person_id)[0][0]
             drink_name = store.load_some_rows_active_columns_from_db(["drink_name"], "drinks", "drink_id", person_fav_id)[0][0]
-            return render_template("display_fav_drink.html", person=person_name.capitalize(), drink=drink_name)
+            return flask.render_template("display_fav_drink.html", person=person_name.capitalize(), drink=drink_name)
 
         else:
             drinks = store.load_some_rows_active_columns_from_db(["drink_id"], "drinks", "drink_name", drink_name)
@@ -176,7 +176,7 @@ def update_favourites():
             person = store.load_some_rows_active_columns_from_db(["person_id"], "people", "full_name", person_name)            
             if person:
                 store.update_db_row_value("people", "full_name", person_name, "favourite_drink_id", input_drink_id)
-                return render_template("display_fav_drink.html", person=person_name.capitalize(), drink=drink_name)
+                return flask.render_template("display_fav_drink.html", person=person_name.capitalize(), drink=drink_name)
             else:
                 return {"you": "messed up!"}
 
@@ -188,20 +188,20 @@ def update_favourites():
 def update_round():
     # TODO better errors!
     # TODO refactor, split into functions for easier reading/updating?
-    if request.method == "GET":
+    if flask.request.method == "GET":
         active_rounds = store.load_all_active_from_db("round")
         if active_rounds:
             orders = get_order_people_and_drinks(active_rounds)
             brewer = store.get_person_name_from_id(active_rounds[0][4])
             brewer = brewer.capitalize()
-            return render_template("display_round_data.html", round=orders, brewer=brewer)
+            return flask.render_template("display_round_data.html", round=orders, brewer=brewer)
         else:
-            return render_template("display_round_data.html", brewer="  none  ")
+            return flask.render_template("display_round_data.html", brewer="  none  ")
 
 
-    elif request.method == "POST":
-        person_name = clean_input(request.form.get("input_name")).lower()
-        drink_name = clean_input(request.form.get("input_drink")).lower()
+    elif flask.request.method == "POST":
+        person_name = clean_input(flask.request.form.get("input_name")).lower()
+        drink_name = clean_input(flask.request.form.get("input_drink")).lower()
         
         person_id = store.get_person_id_from_name(person_name)
         
@@ -230,17 +230,17 @@ def update_round():
                     for order in orders:
                         if person_name.capitalize() == order[0]:
                             order[1] = drink_name
-                    return render_template("display_round_data.html", round=orders, brewer=brewer)
+                    return flask.render_template("display_round_data.html", round=orders, brewer=brewer)
                 else:
                     store.add_person_to_round_from_round_id(active_rounds[0][0], person_id, drink_id)
                     orders.append([person_name.capitalize(), drink_name])
-                    return render_template("display_round_data.html", round=orders, brewer=brewer)
+                    return flask.render_template("display_round_data.html", round=orders, brewer=brewer)
             else:
                 return {"you": "messed up!"}
         else:
             store.save_new_round_to_db_from_name(person_name, drink_name)
             orders = [[person_name.capitalize(), drink_name]]
-            return render_template("display_round_data.html", round=orders, brewer=person_name.capitalize())
+            return flask.render_template("display_round_data.html", round=orders, brewer=person_name.capitalize())
     else:
         return "Hello World"
 
@@ -248,7 +248,7 @@ def update_round():
 @app.route("/clearround", methods=["POST"])
 def clear_round():
     store.update_db_row_value("round", "active", 1, "active", 0)
-    return redirect("/rounds", code=302)
+    return flask.redirect("/rounds", code=302)
 
 
 # ****************************************************************

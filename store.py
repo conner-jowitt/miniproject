@@ -1,7 +1,8 @@
 import json
 import sys
-from connection import create_db_connection
+#from connection import create_db_connection
 from round import *
+import connection
 
 # ***************************************************************
 # Save - Load Functions
@@ -179,7 +180,6 @@ def load_active_columns_from_db(columns, table, active_table=""):
 
 def save_drink_to_new_db_row(columns, values):
     if (len(columns) != len(values)) or (len(columns) == 0):
-        print("Error! column/value mismatch, please ensure the passed lists are of equal length")
         return False
 
     else:
@@ -199,7 +199,6 @@ def save_drink_to_new_db_row(columns, values):
 
 def save_person_to_new_db_row(columns, values):
     if (len(columns) != len(values)) or (len(columns) == 0):
-        print("Error! column/value mismatch, please ensure the passed lists are of equal length")
         return False
 
     else:
@@ -219,7 +218,6 @@ def save_person_to_new_db_row(columns, values):
 
 def save_to_new_db_row(table, columns, values):
     if (len(columns) != len(values)) or (len(columns) == 0):
-        print("Error! column/value mismatch, please ensure the passed lists are of equal length")
         return False
 
     else:
@@ -254,7 +252,7 @@ def update_db_row_multiple_columns(table, column_to_match, column_key_to_match, 
     return result
 
 
-def load_some_rows_active_columns_from_db(columns, table, column_to_match, row_value_to_match):
+def load_some_rows_active_columns_from_db(columns, table, column_to_match, row_value_to_match): # Tested
     select_string = ""
     for item in columns:
         select_string += item + ", "
@@ -267,13 +265,13 @@ def load_some_rows_active_columns_from_db(columns, table, column_to_match, row_v
 
 
 def load_rows_matching_single_column_value(table, column_to_match, row_value_to_match):
-    command = f"SELECT * FROM {table} WHERE active=1 AND {column_to_match}='{row_value_to_match}'"
+    command = f"SELECT * FROM {table} WHERE active=1 AND {column_to_match}='{row_value_to_match}';"
     return run_db_get_command(command,
                               "Error reading data from server!\nfunction: load_rows_matching_single_column_value\n" +
                               "When running command:\n" + command)
 
 
-def update_db_row_value(table, row_id_to_change, row_id, column, value):
+def update_db_row_value(table, row_id_to_change, row_id, column, value): # Tested
     command = f"UPDATE {table} SET {column}='{value}' WHERE {row_id_to_change}='{row_id}';"
     return run_db_set_command(command,
                               "Error saving data to server!\nupdate_db_row_value\n" +
@@ -296,29 +294,29 @@ def load_all_active_from_db(table):
 
 
 def load_all_from_db(table):
-    results = run_db_get_command(f"SELECT * FROM {table};",
-                                 "Error reading data from server!\nfunction: load_all_from_DB")
-    return results
+    command = f"SELECT * FROM {table};"
+    return run_db_get_command(command, "Error reading data from server!\nfunction: load_all_from_DB")
 
 
 def get_db_max_round_id():
-    return run_db_get_command(f"SELECT MAX(round_id) FROM round;", "Error reading data from server!\n" +
-                              "function: load_active_column_from_DB\nwhen trying to get max_id")
+    command = f"SELECT MAX(round_id) FROM round;"
+    return run_db_get_command(command, "Error reading data from server!\n" +
+                              "when trying to get max_id with command:" +command)
 
 
 def get_db_max_person_id():
     command = "SELECT MAX(person_id) FROM people;"
     return run_db_get_command(command, "Error reading data from server!\n" +
-            "when trying to get max_id with command:\n" + command)
+                              "when trying to get max_id with command:\n" + command)
 
 
 def get_db_max_drink_id():
     command = "SELECT MAX(drink_id) FROM drinks;"
     return run_db_get_command(command, "Error reading data from server!\n" +
-            "when trying to get max_id with command:\n" + command)
+                              "when trying to get max_id with command:\n" + command)
 
 
-def get_person_id_from_name(person_name):
+def get_person_id_from_name(person_name): #Tested
     if is_active_in_db("people", "full_name", person_name):
         name_row = load_rows_matching_single_column_value("people", "full_name", person_name)
         return name_row[0][0]
@@ -326,7 +324,7 @@ def get_person_id_from_name(person_name):
         return False
 
 
-def get_person_name_from_id(person_id):
+def get_person_name_from_id(person_id): #Tested
     if is_active_in_db("people", "person_id", person_id):
         name_row = load_rows_matching_single_column_value("people", "person_id", person_id)
         return name_row[0][1]
@@ -334,7 +332,7 @@ def get_person_name_from_id(person_id):
         return False
 
 
-def get_drink_id_from_name(drink_name):
+def get_drink_id_from_name(drink_name): #Tested
     if is_active_in_db("drinks", "drink_name", drink_name):
         drink_row = load_rows_matching_single_column_value("drinks", "drink_name", drink_name)
         return drink_row[0][0]
@@ -342,7 +340,7 @@ def get_drink_id_from_name(drink_name):
         return False
 
 
-def get_drink_name_from_id(drink_id):
+def get_drink_name_from_id(drink_id): #Tested
     if is_active_in_db("drinks", "drink_id", drink_id):
         drink_row = load_rows_matching_single_column_value("drinks", "drink_id", drink_id)
         return drink_row[0][1]
@@ -350,7 +348,7 @@ def get_drink_name_from_id(drink_id):
         return False
 
 
-def is_in_db(table, column_to_check, looking_for_value):
+def is_in_db(table, column_to_check, looking_for_value): #Tested
     result = run_db_get_command(f"SELECT * FROM {table} WHERE {column_to_check}='{looking_for_value}';",
                                 "Error reading data from server!\n" +
                                 "function: load_active_column_from_DB\n" +
@@ -360,7 +358,7 @@ def is_in_db(table, column_to_check, looking_for_value):
     else:
         return False
 
-def is_active_in_db(table, column_to_check, looking_for_value):
+def is_active_in_db(table, column_to_check, looking_for_value): # Tested
     result = run_db_get_command(f"SELECT * FROM {table} WHERE {column_to_check}='{looking_for_value}' AND active=1;",
                                 "Error reading data from server!\n" +
                                 "function: load_active_column_from_DB\n" +
@@ -372,7 +370,7 @@ def is_active_in_db(table, column_to_check, looking_for_value):
 
 
 def run_db_get_command(command, error):
-    db_connection = create_db_connection()
+    db_connection = connection.create_db_connection()
     cursor = db_connection.cursor()
     try:
         cursor.execute(command)
@@ -388,7 +386,7 @@ def run_db_get_command(command, error):
 
 
 def run_db_set_command(command, error):
-    db_connection = create_db_connection()
+    db_connection = connection.create_db_connection()
     cursor = db_connection.cursor()
     try:
         cursor.execute(command)

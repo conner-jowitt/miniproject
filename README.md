@@ -35,7 +35,7 @@ Most of he files in the repo are from a legacy version of the application. The o
 | new_api_with_flask.py | main file, this starts the server |
 | store.py | contains all the functions which interact with the database |
 | static/ | contains the CSS file for the webpages |
-| templates | Contains the main webpage templates |
+| templates/ | Contains the main webpage templates |
 
 ### How you can help
 
