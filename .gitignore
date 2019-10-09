@@ -8,5 +8,5 @@ SQL_script.sql
 connection.py
 **/website/*
 Dockerfile
-requirements.txt
 app_requirements.txt
+*.swp
