@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 
 def clean_input(user_input):
-    special_chars = "%&£$^!()*+=~[]{}/?<>,.`,;:@#'\"\\"
+    special_chars = "|%&£$^!()*+=~[]{}/?<>,.`,;:@#'\"\\"
     user_input = user_input.strip((special_chars + " "))
     result = ""
     for char in user_input:
@@ -21,7 +21,7 @@ def clean_input(user_input):
 
 def return_json(column_headers, db_rows):
     if len(column_headers) != len(db_rows[0]):
-        raise Exception
+        return {}
     else:
         return_dict = {}
         for i in range(len(db_rows)):
@@ -30,6 +30,16 @@ def return_json(column_headers, db_rows):
                 return_dict[i+1][column_headers[j]] = db_rows[i][j]
 
     return return_dict
+
+
+def get_order_people_and_drinks(order_list):
+    return_list = []
+    for row in active_rounds:
+        person = store.get_person_name_from_id(row[1]).capitalize()
+        drink = store.get_drink_name_from_id(row[2])
+        return_list.append([person, drink])
+    return return_list
+
 
 
 # ****************************************************************
@@ -70,7 +80,6 @@ def api_page():
 
 @app.route("/people", methods=["GET", "POST"])
 def update_people():
-    # TODO actual page
     if request.method == "GET":
         people = store.load_all_from_db("people")
         people_list = []
@@ -109,18 +118,17 @@ def update_drinks():
                 drinks_list.append([item[1], item[2]])
         return render_template("drinks_page.html", drinks=drinks_list)
 
-    # TODO add person to DB, and favourite drink, reload GET page
     # TODO make sure everything is active when already in DB
     # TODO actual errors
     if request.method == "POST":
         drink_name = clean_input(request.form.get("input_name")).lower()
         drink_description = clean_input(request.form.get("input_drink")).lower()
 
-        if (not drink_name) or not (drink_description):
+        if (not drink_name) or (not drink_description):
             return {"you": "messed up"}
         
         if store.is_in_db("drinks", "drink_name", drink_name):
-            # person is in db already, check they're active & reactivate if not?
+            # drink is in db already, check they're active & reactivate if not?
             return {}
         else:
             store.save_new_drink_to_db(drink_name)
@@ -177,16 +185,13 @@ def update_round():
     if request.method == "GET":
         active_rounds = store.load_all_active_from_db("round")
         if active_rounds:
-            orders = []
+            orders = get_order_people_and_drinks(active_rounds)
             brewer = store.get_person_name_from_id(active_rounds[0][4])
             brewer = brewer.capitalize()
-            for row in active_rounds:
-                person = store.get_person_name_from_id(row[1]).capitalize()
-                drink = store.get_drink_name_from_id(row[2])
-                orders.append([person, drink])
             return render_template("display_round_data.html", round=orders, brewer=brewer)
         else:
-            return render_template("display_round_data.html", brewer="none")
+            return render_template("display_round_data.html", brewer="  none  ")
+
 
     elif request.method == "POST":
         person_name = clean_input(request.form.get("input_name")).lower()
@@ -198,35 +203,29 @@ def update_round():
             return {"you": "messed up"}        
 
         if not drink_name:
-            person_id = store.get_person_id_from_name(person_name)
             person_fav_id = store.load_some_rows_active_columns_from_db(["favourite_drink_id"], "people", "person_id", person_id)[0][0]
             drink_name = store.load_some_rows_active_columns_from_db(["drink_name"], "drinks", "drink_id", person_fav_id)[0][0]
 
+        drink_id = store.get_drink_id_from_name(drink_name)
+
         active_rounds = store.load_all_active_from_db("round")
         if active_rounds:
+            orders = get_order_people_and_drinks(active_rounds)
             brewer = store.get_person_name_from_id(active_rounds[0][4])
             brewer = brewer.capitalize()
-            orders = []
-            for row in active_rounds:
-                person = store.get_person_name_from_id(row[1]).capitalize()
-                drink = store.get_drink_name_from_id(row[2])
-                orders.append([person, drink])
-            if not store.is_active_in_db("drinks", "drink_name", drink_name):
+            if not store.is_active_in_db("drinks", "drink_id", drink_id):
                 return {"you": "messed up!"}
-            elif store.is_active_in_db("people", "full_name", person_name):
+            elif store.is_active_in_db("people", "person_id", person_id):
                 people_in_round = []
                 for row in active_rounds:
                     people_in_round.append(int(row[1]))
                 if int(person_id) in people_in_round:
-                    drink_id = store.get_drink_id_from_name(drink_name)
                     store.update_db_row_value("round", "user_id", person_id, "drink_id", drink_id)
                     for order in orders:
                         if person_name.capitalize() == order[0]:
                             order[1] = drink_name
                     return render_template("display_round_data.html", round=orders, brewer=brewer)
                 else:
-                    person_id = store.get_person_id_from_name(person_name)
-                    drink_id = store.get_drink_id_from_name(drink_name)
                     store.add_person_to_round_from_round_id(active_rounds[0][0], person_id, drink_id)
                     orders.append([person_name.capitalize(), drink_name])
                     return render_template("display_round_data.html", round=orders, brewer=brewer)

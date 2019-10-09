@@ -1,7 +1,7 @@
 {%  extends 'simple_html_form.html'  %}
 
 {% block titledata  %}
-{% if brewer != "none" %}
+{% if brewer != "  none  " %}
         <title>Round in Progress</title>
 {% else %}
         <title>No round in progress... Yet!</title>
@@ -9,7 +9,7 @@
 {% endblock  %}
 
 {% block aboveForms  %}
-{% if brewer != "none" %}
+{% if brewer != "  none  " %}
             <h1>
                 {{brewer}} is brewing a round! Get your order in now!
             </h1>
@@ -20,7 +20,7 @@
 {% endif %}
 {% endblock %}
 {% block belowForms %}
-{% if brewer != "none" %}
+{% if brewer != "  none  " %}
             <h3>
                 Orders received so far:
             </h3>
