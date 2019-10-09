@@ -151,7 +151,7 @@ def save_new_drink_to_db(drink_name, drink_description=""):
         print("A drink with that name already exists")
         return False
     else:
-        return save_to_new_db_row("drinks", ["drink_id", "drink_name", "drink_description", "active"],
+        return save_drink_to_new_db_row(["drink_id", "drink_name", "drink_description", "active"],
                                   ["", drink_name, drink_description, 1])
 
 
@@ -175,6 +175,26 @@ def load_active_columns_from_db(columns, table, active_table=""):
     results = run_db_get_command(f"SELECT {select_string} FROM {table} WHERE {active_table}active=1;",
                                  "Error reading data from server!\nfunction: load_active_column_from_DB")
     return results
+
+
+def save_drink_to_new_db_row(columns, values):
+    if (len(columns) != len(values)) or (len(columns) == 0):
+        print("Error! column/value mismatch, please ensure the passed lists are of equal length")
+        return False
+
+    else:
+        errors = []
+        max_id = get_db_max_drink_id()
+        if max_id:
+            errors.append(make_new_db_row("drinks", columns[0], max_id[0][0]+1))
+            if len(columns) > 1:
+                errors.append(update_db_row_multiple_columns("drinks", columns[0], max_id[0][0]+1, columns[1:], values[1:]))
+            result = True
+            for res in errors:
+                result = (result and res)
+            return result
+        else:
+            return False
 
 
 def save_person_to_new_db_row(columns, values):
@@ -288,6 +308,12 @@ def get_db_max_round_id():
 
 def get_db_max_person_id():
     command = "SELECT MAX(person_id) FROM people;"
+    return run_db_get_command(command, "Error reading data from server!\n" +
+            "when trying to get max_id with command:\n" + command)
+
+
+def get_db_max_drink_id():
+    command = "SELECT MAX(drink_id) FROM drinks;"
     return run_db_get_command(command, "Error reading data from server!\n" +
             "when trying to get max_id with command:\n" + command)
 

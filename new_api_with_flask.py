@@ -41,6 +41,8 @@ def return_json(column_headers, db_rows):
 def home_page():
     return {"/favourites": "View or update favourites",
             "/rounds": "Create a new round or add people to an open round",
+            "/people": "Add people to the database to be included in a future round",
+            "/drinks": "Add drinks to the database to be included in a future round",
             "/api": {"/people": "lists all people, even those that aren't active",
                      "/people-a": "lists only active people",
                      "/drinks": "lists all drinks, even those which aren't active",
@@ -74,10 +76,9 @@ def update_people():
         people_list = []
         if people:
             for person in people:
-                people_list.append(person[1])
-        return render_template("people_page.html", person="  none  ")
+                people_list.append(person[1].capitalize())
+        return render_template("people_page.html", person="  none  ", people=people_list)
 
-    # TODO add person to DB, and favourite drink, reload GET page
     # TODO make sure everything is active when already in DB
     # TODO actual errors
     if request.method == "POST":
@@ -100,7 +101,6 @@ def update_people():
 
 @app.route("/drinks", methods=["GET", "POST"])
 def update_drinks():
-    # TODO actual page
     if request.method == "GET":
         drinks = store.load_all_from_db("drinks")
         drinks_list = []
@@ -113,18 +113,24 @@ def update_drinks():
     # TODO make sure everything is active when already in DB
     # TODO actual errors
     if request.method == "POST":
-        person_name = clean_input(request.form.get("input_name")).lower()
+        drink_name = clean_input(request.form.get("input_name")).lower()
+        drink_description = clean_input(request.form.get("input_drink")).lower()
 
-        if not person_name:
+        if (not drink_name) or not (drink_description):
             return {"you": "messed up"}
         
-        if store.is_in_db("people", "full_name", person_name):
+        if store.is_in_db("drinks", "drink_name", drink_name):
             # person is in db already, check they're active & reactivate if not?
             return {}
         else:
-            store.save_new_person_to_db(person_name)
-            store.update_db_row_value("people", "full_name", person_name, "favourite_drink_id", 1)
-            return render_template("people_page.html", person=person_name.capitalize())
+            store.save_new_drink_to_db(drink_name)
+            store.update_db_row_value("drinks", "drink_name", drink_name, "drink_description", drink_description)
+            drinks = store.load_all_from_db("drinks")
+            drinks_list = []
+            if drinks:
+                for item in drinks:
+                    drinks_list.append([item[1], item[2]])
+            return render_template("drinks_page.html", drinks=drinks_list)
 
     else:
         return "Hello World!"
